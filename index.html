@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Catalogue Bibliothèque FDSP Jijel</title>
+
+<style>
+body{
+font-family:Arial;
+direction:rtl;
+margin:40px;
+background:#f5f5f5;
+}
+
+h1{
+text-align:center;
+}
+
+input{
+padding:8px;
+margin:5px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+background:white;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:8px;
+}
+
+th{
+background:#eee;
+}
+</style>
+</head>
+
+<body>
+
+<h1>
+فهرس مكتبة كلية الحقوق والعلوم السياسية<br>
+جامعة جيجل – الجزائر
+</h1>
+
+<h3>Recherche dans le catalogue</h3>
+
+<input id="title" placeholder="Titre">
+<input id="author" placeholder="Auteur">
+<input id="class" placeholder="Classification">
+
+<button onclick="search()">Rechercher</button>
+
+<table id="results">
+<thead>
+<tr>
+<th>Numéro</th>
+<th>Titre</th>
+<th>Auteur</th>
+<th>Éditeur</th>
+<th>Année</th>
+<th>Lieu</th>
+<th>Édition</th>
+<th>Classification</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<script>
+
+let data=[];
+
+fetch("catalog_FDSP_jijel.csv")
+.then(r=>r.text())
+.then(text=>{
+let rows=text.split("\n").slice(1);
+
+rows.forEach(r=>{
+let c=r.split(",");
+data.push(c);
+});
+});
+
+function search(){
+
+let title=document.getElementById("title").value;
+let author=document.getElementById("author").value;
+let cls=document.getElementById("class").value;
+
+let body=document.querySelector("#results tbody");
+body.innerHTML="";
+
+data.forEach(r=>{
+
+if(
+r[1]?.includes(title) &&
+r[2]?.includes(author) &&
+r[7]?.includes(cls)
+){
+
+let tr=document.createElement("tr");
+
+r.forEach(c=>{
+let td=document.createElement("td");
+td.textContent=c;
+tr.appendChild(td);
+});
+
+body.appendChild(tr);
+}
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
