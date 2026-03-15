@@ -42,6 +42,8 @@ fetch("catalog_FDSP_jijel.csv")
 .then(response => response.text())
 .then(text => {
 
+    text = text.replace(/^\uFEFF/, ""); // إزالة BOM من CSV
+
     console.log("CSV loaded");   // للتأكد أن الملف وصل
 
     const rows = text.split(/\r?\n/);
