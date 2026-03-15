@@ -36,53 +36,27 @@ th{background:#003366;color:white}
 </table>
 
 <script>
-let data=[];
+fetch("catalog_FDSP_jijel.csv")
+.then(response => response.text())
+.then(text => {
+    const rows = text.split("\n");
+    const table = document.querySelector("#table tbody");
 
-fetch('catalog_FDSP_jijel.csv')
-.then(response=>response.text())
-.then(text=>{
-let rows=text.split('\n').slice(1);
-
-rows.forEach(row=>{
-let cols=row.split(',');
-if(cols.length>7){
-data.push({
-title:cols[1],
-author:cols[2],
-publisher:cols[3],
-year:cols[4],
-class:cols[7]
+    rows.slice(1, 300).forEach(row => {
+        const cols = row.split(",");
+        if(cols.length >= 8){
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${cols[1]}</td>
+                <td>${cols[2]}</td>
+                <td>${cols[3]}</td>
+                <td>${cols[4]}</td>
+                <td>${cols[7]}</td>
+            `;
+            table.appendChild(tr);
+        }
+    });
 });
-}
-});
-
-display(data);
-});
-
-function display(rows){
-let table=document.querySelector("#table tbody");
-table.innerHTML="";
-rows.slice(0,200).forEach(r=>{
-table.innerHTML+=`
-<tr>
-<td>${r.title}</td>
-<td>${r.author}</td>
-<td>${r.publisher}</td>
-<td>${r.year}</td>
-<td>${r.class}</td>
-</tr>`;
-});
-}
-
-function searchTable(){
-let q=document.getElementById("search").value.toLowerCase();
-let filtered=data.filter(r=>
-r.title.toLowerCase().includes(q) ||
-r.author.toLowerCase().includes(q) ||
-r.class.toLowerCase().includes(q)
-);
-display(filtered);
-}
 </script>
 
 </body>
