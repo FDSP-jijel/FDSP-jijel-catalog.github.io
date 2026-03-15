@@ -36,27 +36,66 @@ th{background:#003366;color:white}
 </table>
 
 <script>
+let data = [];
+
 fetch("catalog_FDSP_jijel.csv")
 .then(response => response.text())
 .then(text => {
-    const rows = text.split("\n");
-    const table = document.querySelector("#table tbody");
 
-    rows.slice(1, 300).forEach(row => {
-        const cols = row.split(",");
+    const rows = text.split("\n");
+
+    rows.slice(1).forEach(row => {
+
+        let cols = row.split(";"); // إذا كان CSV مفصول بـ ;
+
+        if(cols.length < 8){
+            cols = row.split(","); // وإذا كان مفصول بـ ,
+        }
+
         if(cols.length >= 8){
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${cols[1]}</td>
-                <td>${cols[2]}</td>
-                <td>${cols[3]}</td>
-                <td>${cols[4]}</td>
-                <td>${cols[7]}</td>
-            `;
-            table.appendChild(tr);
+            data.push({
+                title: cols[1],
+                author: cols[2],
+                publisher: cols[3],
+                year: cols[4],
+                class: cols[7]
+            });
         }
     });
+
+    display(data);
 });
+
+function display(rows){
+    const table = document.querySelector("#table tbody");
+    table.innerHTML="";
+
+    rows.slice(0,300).forEach(r=>{
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+        <td>${r.title}</td>
+        <td>${r.author}</td>
+        <td>${r.publisher}</td>
+        <td>${r.year}</td>
+        <td>${r.class}</td>
+        `;
+
+        table.appendChild(tr);
+    });
+}
+
+function searchTable(){
+    const q = document.getElementById("search").value.toLowerCase();
+
+    const filtered = data.filter(r =>
+        r.title.toLowerCase().includes(q) ||
+        r.author.toLowerCase().includes(q) ||
+        r.class.toLowerCase().includes(q)
+    );
+
+    display(filtered);
+}
 </script>
 
 </body>
