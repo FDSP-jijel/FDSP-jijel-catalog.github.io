@@ -212,22 +212,57 @@ function prevPage(){
 function downloadPDF(){
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: "landscape" });
 
-    let y = 10;
+    // تجهيز البيانات في جدول
+    const tableData = data.map(r => [
+        r.title,
+        r.author,
+        r.publisher,
+        r.place,
+        r.edition,
+        r.year,
+        r.class
+    ]);
 
-    data.slice(0,50).forEach((r,i)=>{
-        doc.text(
-            (i+1) + " - " + r.title + " - " + r.author,
-            10,
-            y
-        );
-        y += 7;
+    doc.autoTable({
+        head: [[
+            "العنوان",
+            "المؤلف",
+            "دار النشر",
+            "مكان النشر",
+            "الطبعة",
+            "السنة",
+            "التصنيف"
+        ]],
+
+        body: tableData,
+
+        styles: {
+            fontSize: 8,
+            halign: "right"
+        },
+
+        headStyles: {
+            halign: "right"
+        },
+
+        margin: { top: 20 },
+
+        didDrawPage: function () {
+            doc.text(
+                "فهرس مكتبة كلية الحقوق والعلوم السياسية",
+                280,
+                10,
+                { align: "right" }
+            );
+        }
     });
 
     doc.save("catalog.pdf");
 }
-function downloadExcel(){
+    
+    function downloadExcel(){
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "catalog");
