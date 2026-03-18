@@ -212,8 +212,9 @@ function prevPage(){
 async function downloadPDF(){
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
 
+    // تحميل الخط
     const font = await fetch("https://fdsp-jijel.github.io/FDSP-jijel-catalog.github.io/Amiri-Regular.ttf")
         .then(res => res.arrayBuffer());
 
@@ -221,16 +222,25 @@ async function downloadPDF(){
     doc.addFont("Amiri.ttf", "Amiri", "normal");
     doc.setFont("Amiri");
 
-    let y = 10;
+    // عنوان
+    doc.setFontSize(14);
+    doc.text("فهرس المكتبة", 200, 10, { align: "right" });
+
+    let y = 20;
 
     data.slice(0,50).forEach((r,i)=>{
-        doc.text(
-            `${i+1} - ${r.title} - ${r.author}`,
-            200,
-            y,
-            { align: "right" }
-        );
-        y += 8;
+        doc.setFontSize(10);
+
+        const line = `${i+1}. ${r.title} | ${r.author}`;
+        
+        doc.text(line, 200, y, { align: "right", maxWidth: 180 });
+
+        y += 7;
+
+        if(y > 280){
+            doc.addPage();
+            y = 10;
+        }
     });
 
     doc.save("catalog.pdf");
