@@ -209,44 +209,24 @@ function prevPage(){
 }
 
 // PDF
-async function downloadPDF(){
+function downloadPDF(){
 
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
+    const doc = new jsPDF();
 
-    // تحميل الخط
-    const font = await fetch("https://fdsp-jijel.github.io/FDSP-jijel-catalog.github.io/Amiri-Regular.ttf")
-        .then(res => res.arrayBuffer());
-
-    doc.addFileToVFS("Amiri.ttf", font);
-    doc.addFont("Amiri.ttf", "Amiri", "normal");
-    doc.setFont("Amiri");
-
-    // عنوان
-    doc.setFontSize(14);
-    doc.text("فهرس المكتبة", 200, 10, { align: "right" });
-
-    let y = 20;
+    let y = 10;
 
     data.slice(0,50).forEach((r,i)=>{
-        doc.setFontSize(10);
-
-        const line = `${i+1}. ${r.title} | ${r.author}`;
-        
-        doc.text(line, 200, y, { align: "right", maxWidth: 180 });
-
+        doc.text(
+            (i+1) + " - " + r.title + " - " + r.author,
+            10,
+            y
+        );
         y += 7;
-
-        if(y > 280){
-            doc.addPage();
-            y = 10;
-        }
     });
 
     doc.save("catalog.pdf");
 }
-
-// Excel
 function downloadExcel(){
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
