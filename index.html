@@ -56,7 +56,6 @@ body{
     align-items:flex-start;
 }
 
-/* SIDEBAR */
 .sidebar{
     width:220px;
 }
@@ -83,7 +82,6 @@ body{
     font-weight:600;
 }
 
-/* MAIN */
 .main{
     flex:1;
 }
@@ -142,6 +140,13 @@ button{
 
 button:hover{
     background:#0055aa;
+}
+
+/* PAGINATION */
+#pagination button{
+    padding:6px 10px;
+    margin:2px;
+    font-size:13px;
 }
 
 </style>
@@ -214,6 +219,9 @@ button:hover{
         <span id="pageInfo"></span>
         <button onclick="nextPage()">التالي</button>
 
+        <!-- 🔥 أرقام الصفحات -->
+        <div id="pagination"></div>
+
         <br>
 
         <button onclick="downloadExcel()">تحميل Excel</button>
@@ -264,7 +272,7 @@ fetch("catalog_FDSP_jijel.csv")
     display(data);
 });
 
-/* عرض + صفحات */
+/* العرض + الصفحات */
 function display(rows){
 
     currentData = rows;
@@ -299,6 +307,25 @@ function display(rows){
 
     document.getElementById("pageInfo").innerText =
         "صفحة " + currentPage + " / " + maxPage;
+
+    /* أرقام الصفحات */
+    let pagesHTML = "";
+
+    for(let i = 1; i <= maxPage; i++){
+        pagesHTML += `
+        <button onclick="goToPage(${i})"
+        style="background:${i === currentPage ? '#1a8f3a' : '#003366'}">
+        ${i}
+        </button>`;
+    }
+
+    document.getElementById("pagination").innerHTML = pagesHTML;
+}
+
+/* الانتقال لصفحة */
+function goToPage(page){
+    currentPage = page;
+    display(currentData);
 }
 
 /* بحث */
@@ -331,7 +358,7 @@ function advancedFilter(){
     display(filtered);
 }
 
-/* تنقل الصفحات */
+/* تنقل */
 function nextPage(){
     const maxPage = Math.ceil(currentData.length / rowsPerPage);
     if(currentPage < maxPage){
@@ -349,7 +376,6 @@ function prevPage(){
 
 /* Excel */
 function downloadExcel(){
-
     const ws = XLSX.utils.json_to_sheet(currentData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "catalog");
