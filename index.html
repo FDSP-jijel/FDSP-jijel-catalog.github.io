@@ -17,23 +17,33 @@ body{
     display:flex;
     align-items:center;
     gap:15px;
-    background:white;
     padding:15px 20px;
     border-radius:12px;
-    box-shadow:0 4px 15px rgba(0,0,0,0.1);
     margin-bottom:20px;
     position:sticky;
     top:0;
     z-index:1000;
+
+    /* صورة الشريط فقط */
+    background:url("logo.png") center/cover no-repeat;
 }
 
-.header img{
-    width:80px;
-    height:80px;
-    object-fit:contain;
-    border-radius:10px;
+/* طبقة شفافة فوق الصورة */
+.header::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:rgba(255,255,255,0.85);
+    border-radius:12px;
+    z-index:0;
 }
 
+.header *{
+    position:relative;
+    z-index:1;
+}
+
+/* النص داخل الشريط */
 .header-text h2{
     font-size:16px;
     color:#003366;
@@ -116,8 +126,6 @@ button:hover{
 
 <!-- HEADER -->
 <div class="header">
-    <img src="logo.png" alt="شعار الجامعة">
-
     <div class="header-text">
         <h2>جامعة محمد الصديق بن يحيى – جيجل</h2>
         <div class="faculty-title">كلية الحقوق والعلوم السياسية</div>
@@ -126,7 +134,6 @@ button:hover{
 
 <h1>فهرس مكتبة الكلية</h1>
 
-<!-- SEARCH -->
 <input type="text" id="search" placeholder="بحث عام..." onkeyup="searchTable()">
 
 <br>
