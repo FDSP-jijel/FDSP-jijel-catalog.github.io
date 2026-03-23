@@ -112,8 +112,32 @@ fetch("catalog_FDSP_jijel.csv")
 
         if(!row.trim()) return;
 
-        let cols = row.split(/[\t;,]/);
-        cols = cols.map(c => c.replace(/^"|"$/g,"").trim());
+        let cols = row.split(";");
+
+// إذا كان أقل من 8 أعمدة نحاول TAB
+if(cols.length < 8){
+    cols = row.split("\t");
+}
+
+// تنظيف
+cols = cols.map(c => c.replace(/^"|"$/g,"").trim());
+
+// 🔥 إصلاح الانزياح تلقائيًا
+if(cols.length > 8){
+    // ندمج الأعمدة الزائدة في العنوان
+    cols[1] = cols.slice(1, cols.length - 6).join(" ");
+    
+    cols = [
+        cols[0],       // رقم النسخة
+        cols[1],       // العنوان بعد الدمج
+        cols[cols.length - 6],
+        cols[cols.length - 5],
+        cols[cols.length - 4],
+        cols[cols.length - 3],
+        cols[cols.length - 2],
+        cols[cols.length - 1]
+    ];
+}
 
         if(cols.length >= 8){
             data.push({
