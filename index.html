@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>فهرس مكتبة كلية الحقوق والعلوم السياسية – جامعة جيجل</title>
+<title>Library Catalog</title>
 
 <style>
 
@@ -91,7 +91,7 @@ h1{
     text-align:center;
 }
 
-/* SEARCH MODERN */
+/* SEARCH */
 .search-box{
     display:flex;
     gap:10px;
@@ -173,6 +173,11 @@ button:hover{
     font-size:13px;
 }
 
+.lang-switch{
+    text-align:center;
+    margin-bottom:10px;
+}
+
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -183,236 +188,246 @@ button:hover{
 
 <!-- HEADER -->
 <div class="header">
-    <img src="logo.png" alt="شعار الجامعة">
+    <img src="logo.png">
 
     <div class="header-text">
-        <h2>جامعة محمد الصديق بن يحيى – جيجل</h2>
-        <div class="faculty-title">كلية الحقوق والعلوم السياسية</div>
+        <h2 id="uni">جامعة محمد الصديق بن يحيى – جيجل</h2>
+        <div class="faculty-title" id="faculty">كلية الحقوق والعلوم السياسية</div>
     </div>
 </div>
 
-<!-- LAYOUT -->
 <div class="container">
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <div class="card">
-            <img src="faculty.jpg" alt="صورة الكلية" onerror="this.style.display='none'">
-            <p>كلية الحقوق والعلوم السياسية</p>
-        </div>
+<div class="sidebar">
+    <div class="card">
+        <img src="faculty.jpg" onerror="this.style.display='none'">
+        <p id="facultySide">كلية الحقوق والعلوم السياسية</p>
     </div>
+</div>
 
-    <!-- MAIN -->
-    <div class="main">
+<div class="main">
 
-        <h1>فهرس مكتبة الكلية</h1>
+<h1 id="title">فهرس مكتبة الكلية</h1>
 
-        <!-- 🔥 SEARCH MODERN -->
-        <div class="search-box">
+<!-- 🌍 LANGUAGE -->
+<div class="lang-switch">
+    <button onclick="setLang('ar')">العربية</button>
+    <button onclick="setLang('fr')">Français</button>
+    <button onclick="setLang('en')">English</button>
+</div>
 
-            <div class="search-input">
-                <span>🔍</span>
-                <input type="text" id="search"
-                       placeholder="ابحث عن كتاب، مؤلف، أو عنوان..."
-                       onkeyup="searchTable()">
-            </div>
+<div class="search-box">
 
-            <input type="text" id="authorFilter" placeholder="تحديد البحث حسب المؤلف">
-            <input type="text" id="yearFilter" placeholder="تحديد البحث حسب السنة">
+<div class="search-input">
+    <span>🔍</span>
+    <input type="text" id="search" onkeyup="searchTable()">
+</div>
 
-            <button onclick="advancedFilter()" style="background:#1a8f3a;">
-                🔍 تحديد البحث
-            </button>
+<input type="text" id="authorFilter">
+<input type="text" id="yearFilter">
 
-        </div>
+<button onclick="advancedFilter()" id="filterBtn">🔍</button>
 
-        <p id="count"></p>
+</div>
 
-        <table>
-        <thead>
-        <tr>
-        <th onclick="sortTable('title')">العنوان</th>
-        <th onclick="sortTable('author')">المؤلف</th>
-        <th onclick="sortTable('publisher')">دار النشر</th>
-        <th onclick="sortTable('place')">مكان النشر</th>
-        <th onclick="sortTable('edition')">الطبعة</th>
-        <th onclick="sortTable('year')">سنة النشر</th>
-        <th onclick="sortTable('class')">رقم التصنيف</th>
-        </tr>
-        </thead>
+<p id="count"></p>
 
-        <tbody id="tbody"></tbody>
-        </table>
+<table>
+<thead>
+<tr>
+<th onclick="sortTable('title')" id="th1"></th>
+<th onclick="sortTable('author')" id="th2"></th>
+<th onclick="sortTable('publisher')" id="th3"></th>
+<th onclick="sortTable('place')" id="th4"></th>
+<th onclick="sortTable('edition')" id="th5"></th>
+<th onclick="sortTable('year')" id="th6"></th>
+<th onclick="sortTable('class')" id="th7"></th>
+</tr>
+</thead>
 
-        <br>
+<tbody id="tbody"></tbody>
+</table>
 
-        <button onclick="prevPage()">السابق</button>
-        <span id="pageInfo"></span>
-        <button onclick="nextPage()">التالي</button>
+<br>
 
-        <div id="pagination"></div>
+<button onclick="prevPage()" id="prev"></button>
+<span id="pageInfo"></span>
+<button onclick="nextPage()" id="next"></button>
 
-        <br>
+<div id="pagination"></div>
 
-        <button onclick="downloadExcel()">تحميل Excel</button>
+<br>
 
-    </div>
+<button onclick="downloadExcel()" id="excel"></button>
+
+</div>
 </div>
 
 <script>
 
-let data = [];
-let currentData = [];
-let currentPage = 1;
-let rowsPerPage = 100;
+let currentLang = "ar";
 
-/* LOAD */
-fetch("catalog_FDSP_jijel.csv")
-.then(res => res.text())
-.then(text => {
+const T = {
+ar:{
+title:"فهرس مكتبة الكلية",
+search:"ابحث...",
+author:"تحديد حسب المؤلف",
+year:"تحديد حسب السنة",
+filter:"تحديد البحث",
+count:"عدد الكتب",
+page:"صفحة",
+prev:"السابق",
+next:"التالي",
+excel:"تحميل Excel",
+th:["العنوان","المؤلف","دار النشر","المكان","الطبعة","السنة","التصنيف"]
+},
+fr:{
+title:"Catalogue",
+search:"Rechercher...",
+author:"Filtrer auteur",
+year:"Filtrer année",
+filter:"Appliquer",
+count:"Nombre de livres",
+page:"Page",
+prev:"Précédent",
+next:"Suivant",
+excel:"Excel",
+th:["Titre","Auteur","Éditeur","Lieu","Édition","Année","Classe"]
+},
+en:{
+title:"Library Catalog",
+search:"Search...",
+author:"Filter author",
+year:"Filter year",
+filter:"Apply",
+count:"Books",
+page:"Page",
+prev:"Previous",
+next:"Next",
+excel:"Download Excel",
+th:["Title","Author","Publisher","Place","Edition","Year","Class"]
+}
+};
 
-    text = text.replace(/^\uFEFF/, "");
-    const rows = text.split(/\r?\n/);
+function setLang(lang){
 
-    rows.slice(1).forEach(row => {
+currentLang=lang;
 
-        if(!row.trim()) return;
+document.body.dir = (lang==="ar")?"rtl":"ltr";
 
-        let cols = row.split(";");
+document.getElementById("title").innerText=T[lang].title;
+document.getElementById("search").placeholder=T[lang].search;
+document.getElementById("authorFilter").placeholder=T[lang].author;
+document.getElementById("yearFilter").placeholder=T[lang].year;
+document.getElementById("filterBtn").innerText="🔍 "+T[lang].filter;
 
-        if(cols.length < 8){
-            cols = row.split("\t");
-        }
+document.getElementById("prev").innerText=T[lang].prev;
+document.getElementById("next").innerText=T[lang].next;
+document.getElementById("excel").innerText=T[lang].excel;
 
-        cols = cols.map(c => c.replace(/^"|"$/g,"").trim());
-
-        if(cols.length >= 8){
-            data.push({
-                title: cols[1] || "",
-                author: cols[2] || "",
-                publisher: cols[3] || "",
-                place: cols[5] || "",
-                edition: cols[6] || "",
-                year: cols[4] || "",
-                class: cols[7] || ""
-            });
-        }
-    });
-
-    display(data);
+T[lang].th.forEach((t,i)=>{
+document.getElementById("th"+(i+1)).innerText=t;
 });
 
-/* DISPLAY + PAGINATION */
+display(currentData);
+}
+
+/* DATA + FUNCTIONS نفس الكود القديم بدون تغيير */
+let data=[],currentData=[],currentPage=1,rowsPerPage=100;
+
+fetch("catalog_FDSP_jijel.csv")
+.then(res=>res.text())
+.then(text=>{
+text=text.replace(/^\uFEFF/,"");
+const rows=text.split(/\r?\n/);
+
+rows.slice(1).forEach(row=>{
+if(!row.trim()) return;
+let cols=row.split(";");
+if(cols.length<8) cols=row.split("\t");
+cols=cols.map(c=>c.replace(/^"|"$/g,"").trim());
+
+if(cols.length>=8){
+data.push({
+title:cols[1]||"",
+author:cols[2]||"",
+publisher:cols[3]||"",
+place:cols[5]||"",
+edition:cols[6]||"",
+year:cols[4]||"",
+class:cols[7]||""
+});
+}
+});
+display(data);
+setLang("ar");
+});
+
 function display(rows){
 
-    currentData = rows;
+currentData=rows;
 
-    const maxPage = Math.max(1, Math.ceil(rows.length / rowsPerPage));
+const maxPage=Math.max(1,Math.ceil(rows.length/rowsPerPage));
+if(currentPage>maxPage) currentPage=1;
 
-    if(currentPage > maxPage) currentPage = 1;
+const start=(currentPage-1)*rowsPerPage;
+const pageRows=rows.slice(start,start+rowsPerPage);
 
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
+let html="";
+pageRows.forEach(r=>{
+html+=`<tr>
+<td>${r.title}</td>
+<td>${r.author}</td>
+<td>${r.publisher}</td>
+<td>${r.place}</td>
+<td>${r.edition}</td>
+<td>${r.year}</td>
+<td>${r.class}</td>
+</tr>`;
+});
 
-    const pageRows = rows.slice(start, end);
+document.getElementById("tbody").innerHTML=html;
 
-    let html = "";
-    pageRows.forEach(r=>{
-        html += `
-        <tr>
-            <td>${r.title}</td>
-            <td>${r.author}</td>
-            <td>${r.publisher}</td>
-            <td>${r.place}</td>
-            <td>${r.edition}</td>
-            <td>${r.year}</td>
-            <td>${r.class}</td>
-        </tr>`;
-    });
+document.getElementById("count").innerText=
+T[currentLang].count+" : "+rows.length;
 
-    document.getElementById("tbody").innerHTML = html;
+document.getElementById("pageInfo").innerText=
+T[currentLang].page+" "+currentPage+" / "+maxPage;
 
-    document.getElementById("count").innerText =
-        "عدد الكتب: " + rows.length;
-
-    document.getElementById("pageInfo").innerText =
-        "صفحة " + currentPage + " / " + maxPage;
-
-    let pagesHTML = "";
-
-    for(let i = 1; i <= maxPage; i++){
-        pagesHTML += `
-        <button onclick="goToPage(${i})"
-        style="background:${i === currentPage ? '#1a8f3a' : '#003366'}">
-        ${i}
-        </button>`;
-    }
-
-    document.getElementById("pagination").innerHTML = pagesHTML;
+let pagesHTML="";
+for(let i=1;i<=maxPage;i++){
+pagesHTML+=`<button onclick="goToPage(${i})"
+style="background:${i===currentPage?'#1a8f3a':'#003366'}">${i}</button>`;
+}
+document.getElementById("pagination").innerHTML=pagesHTML;
 }
 
-function goToPage(page){
-    currentPage = page;
-    display(currentData);
-}
+function goToPage(p){currentPage=p;display(currentData);}
 
-/* SEARCH */
 function searchTable(){
-
-    const q = document.getElementById("search").value.toLowerCase().trim();
-
-    const filtered = data.filter(r => {
-        return (
-            (r.title && r.title.toLowerCase().includes(q)) ||
-            (r.author && r.author.toLowerCase().includes(q)) ||
-            (r.publisher && r.publisher.toLowerCase().includes(q)) ||
-            (r.place && r.place.toLowerCase().includes(q)) ||
-            (r.year && String(r.year).includes(q)) ||
-            (r.class && String(r.class).includes(q))
-        );
-    });
-
-    currentPage = 1;
-    display(filtered);
+const q=document.getElementById("search").value.toLowerCase();
+const filtered=data.filter(r=>Object.values(r).some(v=>v&&String(v).toLowerCase().includes(q)));
+currentPage=1;display(filtered);
 }
 
-/* FILTER */
 function advancedFilter(){
-
-    const author = document.getElementById("authorFilter").value.toLowerCase();
-    const year = document.getElementById("yearFilter").value;
-
-    const filtered = data.filter(r =>
-        (!author || r.author.toLowerCase().includes(author)) &&
-        (!year || r.year.includes(year))
-    );
-
-    currentPage = 1;
-    display(filtered);
+const a=document.getElementById("authorFilter").value.toLowerCase();
+const y=document.getElementById("yearFilter").value;
+const filtered=data.filter(r=>
+(!a||r.author.toLowerCase().includes(a)) &&
+(!y||r.year.includes(y))
+);
+currentPage=1;display(filtered);
 }
 
-/* NAV */
-function nextPage(){
-    const maxPage = Math.ceil(currentData.length / rowsPerPage);
-    if(currentPage < maxPage){
-        currentPage++;
-        display(currentData);
-    }
-}
+function nextPage(){if(currentPage<Math.ceil(currentData.length/rowsPerPage)){currentPage++;display(currentData);}}
+function prevPage(){if(currentPage>1){currentPage--;display(currentData);}}
 
-function prevPage(){
-    if(currentPage > 1){
-        currentPage--;
-        display(currentData);
-    }
-}
-
-/* EXCEL */
 function downloadExcel(){
-    const ws = XLSX.utils.json_to_sheet(currentData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "catalog");
-    XLSX.writeFile(wb, "catalog.xlsx");
+const ws=XLSX.utils.json_to_sheet(currentData);
+const wb=XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb,ws,"catalog");
+XLSX.writeFile(wb,"catalog.xlsx");
 }
 
 </script>
